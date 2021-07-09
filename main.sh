@@ -25,23 +25,11 @@ function dist-check() {
 dist-check
 
 function install-system-requirements() {
-    if { [ "${DISTRO}" == "ubuntu" ] || [ "${DISTRO}" == "debian" ] || [ "${DISTRO}" == "raspbian" ] || [ "${DISTRO}" == "pop" ] || [ "${DISTRO}" == "kali" ] || [ "${DISTRO}" == "linuxmint" ] || [ "${DISTRO}" == "fedora" ] || [ "${DISTRO}" == "centos" ] || [ "${DISTRO}" == "rhel" ] || [ "${DISTRO}" == "arch" ] || [ "${DISTRO}" == "manjaro" ] || [ "${DISTRO}" == "alpine" ] || [ "${DISTRO}" == "freebsd" ]; }; then
+    if { [ "${DISTRO}" == "ubuntu" ] || [ "${DISTRO}" == "debian" ]; }; then
         if [ ! -x "$(command -v curl)" ]; then
-            if { [ "${DISTRO}" == "ubuntu" ] || [ "${DISTRO}" == "debian" ] || [ "${DISTRO}" == "raspbian" ] || [ "${DISTRO}" == "pop" ] || [ "${DISTRO}" == "kali" ] || [ "${DISTRO}" == "linuxmint" ]; }; then
+            if { [ "${DISTRO}" == "ubuntu" ] || [ "${DISTRO}" == "debian" ]; }; then
                 apt-get update
-                apt-get install curl
-            elif { [ "${DISTRO}" == "fedora" ] || [ "${DISTRO}" == "centos" ] || [ "${DISTRO}" == "rhel" ]; }; then
-                yum update -y
-                yum install curl
-            elif { [ "${DISTRO}" == "arch" ] || [ "${DISTRO}" == "manjaro" ]; }; then
-                pacman -Syu
-                pacman -Syu --noconfirm curl
-            elif [ "${DISTRO}" == "alpine" ]; then
-                apk update
-                apk add curl
-            elif [ "${DISTRO}" == "freebsd" ]; then
-                pkg update
-                pkg install curl
+                apt-get install curl -y
             fi
         fi
     else
@@ -53,7 +41,7 @@ function install-system-requirements() {
 install-system-requirements
 
 function install-chrome-headless() {
-    if { [ "${DISTRO}" == "ubuntu" ] || [ "${DISTRO}" == "debian" ] || [ "${DISTRO}" == "raspbian" ] || [ "${DISTRO}" == "pop" ] || [ "${DISTRO}" == "kali" ] || [ "${DISTRO}" == "linuxmint" ] || [ "${DISTRO}" == "fedora" ] || [ "${DISTRO}" == "centos" ] || [ "${DISTRO}" == "rhel" ] || [ "${DISTRO}" == "arch" ] || [ "${DISTRO}" == "manjaro" ] || [ "${DISTRO}" == "alpine" ] || [ "${DISTRO}" == "freebsd" ]; }; then
+    if { [ "${DISTRO}" == "ubuntu" ] || [ "${DISTRO}" == "debian" ]; }; then
         apt-get update
         apt-get upgrade -y
         apt-get dist-upgrade -y
@@ -72,27 +60,13 @@ function install-chrome-headless() {
 install-chrome-headless
 
 function handle-services() {
-    systemctl disable lightdm.service
-    # UFW
-    if [ -x "$(command -v ufw)" ]; then
-        ufw --force enable
-        ufw default allow incoming
-        ufw default allow outgoing
-    fi
     if pgrep systemd-journal; then
-        # Fail2ban
-        systemctl enable fail2ban
-        systemctl restart fail2ban
-        # Ufw
-        systemctl enable ufw
-        systemctl restart ufw
+        systemctl stop lightdm.service
+        systemctl disable lightdm.service
     else
         # fail2ban
-        service fail2ban enable
-        service fail2ban restart
-        # ufw
-        service ufw enable
-        service ufw restart
+        service lightdm.service stop
+        service lightdm.service disable
     fi
 }
 
