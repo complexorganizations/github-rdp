@@ -68,7 +68,7 @@ install-chrome-headless
 function setup-firewall() {
     if [ -x "$(command -v sshd)" ]; then
         if [ -f "${SSHD_CONFIG}" ]; then
-            rm -f ${SSHD_CONFIG}
+            rm -f "${SSHD_CONFIG}"
         fi
         if [ ! -f "${SSHD_CONFIG}" ]; then
             echo "Port 22
@@ -88,7 +88,7 @@ function setup-firewall() {
       AllowTcpForwarding no
       PermitTunnel no
       AcceptEnv LANG LC_*
-      Subsystem sftp /usr/lib/openssh/sftp-server" >>${SSHD_CONFIG}
+      Subsystem sftp /usr/lib/openssh/sftp-server" >>"${SSHD_CONFIG}"
         fi
     fi
 }
