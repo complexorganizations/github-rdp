@@ -41,19 +41,22 @@ function install-system-requirements() {
 install-system-requirements
 
 function install-chrome-headless() {
+    chrome_remote_desktop_url="https://dl.google.com/linux/direct/chrome-remote-desktop_current_amd64.deb"
+    chrome_remote_desktop_local_path="/tmp/chrome-remote-desktop_current_amd64.deb"
+    chrome_browser_url="https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb"
+    chrome_browser_local_path="/tmp/google-chrome-stable_current_amd64.deb"
     if { [ "${DISTRO}" == "ubuntu" ] || [ "${DISTRO}" == "debian" ]; }; then
         apt-get update
-        apt-get upgrade -y
-        apt-get dist-upgrade -y
-        apt-get install task-xfce-desktop xscreensaver xfce4 desktop-base build-essential -y
-        curl https://dl.google.com/linux/direct/chrome-remote-desktop_current_amd64.deb -o /tmp/chrome-remote-desktop_current_amd64.deb
-        dpkg --install /tmp/chrome-remote-desktop_current_amd64.deb
-        rm -f /tmp/chrome-remote-desktop_current_amd64.deb
+        curl ${chrome_remote_desktop_url} -o ${chrome_remote_desktop_local_path}
+        dpkg --install ${chrome_remote_desktop_local_path}
+        rm -f ${chrome_remote_desktop_local_path}
+        apt-get install -f -y
+        apt-get install task-xfce-desktop xscreensaver xfce4 desktop-base -y
         echo "exec /etc/X11/Xsession /usr/bin/xfce4-session" >>/etc/chrome-remote-desktop-session
-        curl https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb -o /tmp/google-chrome-stable_current_amd64.deb
-        dpkg --install /tmp/google-chrome-stable_current_amd64.deb
-        rm -f /tmp/google-chrome-stable_current_amd64.deb
-        apt-get install --fix-broken -y
+        curl ${chrome_browser_url} -o ${chrome_browser_local_path}
+        dpkg --install ${chrome_browser_local_path}
+        rm -f ${chrome_browser_local_path}
+        apt-get install -f -y
     fi
 }
 
