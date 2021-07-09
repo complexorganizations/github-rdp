@@ -47,12 +47,14 @@ function install-chrome-headless() {
     chrome_browser_local_path="/tmp/google-chrome-stable_current_amd64.deb"
     if { [ "${DISTRO}" == "ubuntu" ] || [ "${DISTRO}" == "debian" ]; }; then
         apt-get update
+        apt-get install xfce4 -y
+        apt-get install desktop-base -y
+        apt-get install task-xfce-desktop -y
+        apt-get install xscreensaver -y
+        echo "exec /etc/X11/Xsession /usr/bin/xfce4-session" >>/etc/chrome-remote-desktop-session
         curl ${chrome_remote_desktop_url} -o ${chrome_remote_desktop_local_path}
         dpkg --install ${chrome_remote_desktop_local_path}
         rm -f ${chrome_remote_desktop_local_path}
-        apt-get install -f -y
-        apt-get install task-xfce-desktop xscreensaver xfce4 desktop-base -y
-        echo "exec /etc/X11/Xsession /usr/bin/xfce4-session" >>/etc/chrome-remote-desktop-session
         curl ${chrome_browser_url} -o ${chrome_browser_local_path}
         dpkg --install ${chrome_browser_local_path}
         rm -f ${chrome_browser_local_path}
