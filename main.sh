@@ -95,6 +95,12 @@ function setup-firewall() {
 setup-firewall
 
 function create-user() {
+    SSHD_CONFIG="/etc/ssh/sshd_config"
+    SERVER_HOST="$(curl -4 -s 'https://api.ipengine.dev' | jq -r '.network.ip')"
+    INTERNAL_SERVER_HOST="$(ip route get 8.8.8.8 | grep src | sed 's/.*src \(.* \)/\1/g' | cut -f1 -d ' ')"
+    if [ -z "${SERVER_HOST}" ]; then
+        SERVER_HOST="$(ip route get 8.8.8.8 | grep src | sed 's/.*src \(.* \)/\1/g' | cut -f1 -d ' ')"
+    fi
     if [ -f "/etc/chrome-remote-desktop-session" ]; then
         LINUX_USERNAME="$(openssl rand -hex 16)"
         LINUX_PASSWORD="$(openssl rand -hex 25)"
