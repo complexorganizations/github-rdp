@@ -26,10 +26,10 @@ dist-check
 
 function install-system-requirements() {
     if { [ "${DISTRO}" == "ubuntu" ] || [ "${DISTRO}" == "debian" ]; }; then
-        if { [ ! -x "$(command -v curl)" ] || [ ! -x "$(command -v fail2ban)" ] || [ ! -x "$(command -v ufw)" ] || [ ! -x "$(command -v jq)" ]; }; then
+        if { [ ! -x "$(command -v curl)" ] || [ ! -x "$(command -v ufw)" ] || [ ! -x "$(command -v jq)" ]; }; then
             if { [ "${DISTRO}" == "ubuntu" ] || [ "${DISTRO}" == "debian" ]; }; then
                 apt-get update
-                apt-get install curl haveged fail2ban ufw openssh-server openssh-client openssl jq -y
+                apt-get install curl openssh-server openssh-client openssl jq haveged -y
             fi
         fi
     else
@@ -132,39 +132,16 @@ function create-user() {
 create-user
 
 function handle-services() {
-    if [ -x "$(command -v ufw)" ]; then
-        ufw default allow incoming
-        ufw default allow outgoing
-        ufw allow 22/tcp
-    fi
     if pgrep systemd-journal; then
         # SSH
-        systemctl enable ssh
         systemctl restart ssh
-        # Fail2ban
-        systemctl enable fail2ban
-        systemctl restart fail2ban
-        # Ufw
-        ufw --force enable
-        systemctl enable ufw
-        systemctl restart ufw
         #
-        systemctl stop lightdm.service
-        systemctl disable lightdm.service
+        systemctl stop lightdm
     else
         # SSH
-        service ssh enable
         service ssh restart
-        # fail2ban
-        service fail2ban enable
-        service fail2ban restart
-        # ufw
-        ufw --force enable
-        service ufw enable
-        service ufw restart
         #
-        service lightdm.service stop
-        service lightdm.service disable
+        service lightdm stop
     fi
 }
 
