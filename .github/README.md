@@ -11,3 +11,8 @@ Using github codespaces, you may create a free temporary system.
 
 What is the purpose of this repo?
 - Use a free server using github codespaces.
+
+
+How do i get the key?
+
+- `https://remotedesktop.google.com/headless`
