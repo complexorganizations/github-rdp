@@ -66,6 +66,7 @@ install-chrome-headless
 
 function setup-firewall() {
     if [ -x "$(command -v sshd)" ]; then
+        SSHD_CONFIG="/etc/ssh/sshd_config"
         if [ -f "${SSHD_CONFIG}" ]; then
             rm -f "${SSHD_CONFIG}"
         fi
@@ -95,7 +96,6 @@ function setup-firewall() {
 setup-firewall
 
 function create-user() {
-    SSHD_CONFIG="/etc/ssh/sshd_config"
     SERVER_HOST="$(curl -4 -s 'https://api.ipengine.dev' | jq -r '.network.ip')"
     INTERNAL_SERVER_HOST="$(ip route get 8.8.8.8 | grep src | sed 's/.*src \(.* \)/\1/g' | cut -f1 -d ' ')"
     if [ -z "${SERVER_HOST}" ]; then
