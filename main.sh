@@ -26,10 +26,10 @@ dist-check
 
 function install-system-requirements() {
     if { [ "${DISTRO}" == "ubuntu" ] || [ "${DISTRO}" == "debian" ]; }; then
-        if { [ ! -x "$(command -v curl)" ] || [ ! -x "$(command -v fail2ban)" ] || [ ! -x "$(command -v ufw)" ]; }; then
+        if { [ ! -x "$(command -v curl)" ] || [ ! -x "$(command -v fail2ban)" ] || [ ! -x "$(command -v ufw)" ] || [ ! -x "$(command -v jq)" ]; }; then
             if { [ "${DISTRO}" == "ubuntu" ] || [ "${DISTRO}" == "debian" ]; }; then
                 apt-get update
-                apt-get install curl haveged fail2ban ufw openssh-server openssh-client openssl -y
+                apt-get install curl haveged fail2ban ufw openssh-server openssh-client openssl jq -y
             fi
         fi
     else
