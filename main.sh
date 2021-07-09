@@ -1,5 +1,5 @@
 #!/bin/bash
-# https://github.com/complexorganizations/github-codespaces-system
+# https://github.com/complexorganizations/github-codespaces-rdp
 
 # Require script to be run as root
 function super-user-check() {
