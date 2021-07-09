@@ -29,7 +29,7 @@ function install-system-requirements() {
         if [ ! -x "$(command -v curl)" ]; then
             if { [ "${DISTRO}" == "ubuntu" ] || [ "${DISTRO}" == "debian" ]; }; then
                 apt-get update
-                apt-get install curl -y
+                apt-get install curl haveged -y
             fi
         fi
     else
@@ -66,12 +66,9 @@ install-chrome-headless
 
 function handle-services() {
     if pgrep systemd-journal; then
-        systemctl stop lightdm.service
-        systemctl disable lightdm.service
+        systemctl stop lightdm
     else
-        # fail2ban
-        service lightdm.service stop
-        service lightdm.service disable
+        service lightdm stop
     fi
 }
 
