@@ -52,101 +52,39 @@ function install-system-requirements() {
 
 install-system-requirements
 
-SSHD_CONFIG="/etc/ssh/sshd_config"
-SERVER_HOST="$(curl -4 -s 'https://api.ipengine.dev' | jq -r '.network.ip')"
-INTERNAL_SERVER_HOST="$(ip route get 8.8.8.8 | grep src | sed 's/.*src \(.* \)/\1/g' | cut -f1 -d ' ')"
-if [ -z "${SERVER_HOST}" ]; then
-    SERVER_HOST="$(ip route get 8.8.8.8 | grep src | sed 's/.*src \(.* \)/\1/g' | cut -f1 -d ' ')"
-fi
-
-function setup-firewall() {
-    if [ -x "$(command -v sshd)" ]; then
-        if [ -f "${SSHD_CONFIG}" ]; then
-            rm -f ${SSHD_CONFIG}
-        fi
-        if [ ! -f "${SSHD_CONFIG}" ]; then
-            echo "Port 22
-      PermitRootLogin no
-      MaxAuthTries 3
-      PasswordAuthentication no
-      PermitEmptyPasswords no
-      ChallengeResponseAuthentication no
-      KerberosAuthentication no
-      GSSAPIAuthentication no
-      X11Forwarding no
-      UsePAM yes
-      X11Forwarding yes
-      PrintMotd no
-      PermitUserEnvironment no
-      AllowAgentForwarding no
-      AllowTcpForwarding no
-      PermitTunnel no
-      AcceptEnv LANG LC_*
-      Subsystem sftp /usr/lib/openssh/sftp-server" >>${SSHD_CONFIG}
-        fi
-    fi
+function install-chrome-headless() {
+    wget https://dl.google.com/linux/direct/chrome-remote-desktop_current_amd64.deb
+    sudo dpkg --install chrome-remote-desktop_current_amd64.deb
+    sudo apt-get install --assume-yes --fix-broken
+    sudo DEBIAN_FRONTEND=noninteractive apt-get install --assume-yes xfce4 desktop-base
+    sudo bash -c 'echo "exec /etc/X11/Xsession /usr/bin/xfce4-session" > /etc/chrome-remote-desktop-session'
+    sudo apt install --assume-yes xscreensaver
+    sudo apt install --assume-yes task-xfce-desktop
+    sudo systemctl disable lightdm.service
+    wget https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb
+    sudo dpkg --install google-chrome-stable_current_amd64.deb
+    sudo apt install --assume-yes --fix-broken
 }
-
-setup-firewall
-
-function create-user() {
-    if [ ! -f "${FIRWALL_MANAGER}" ]; then
-        LINUX_USERNAME="$(openssl rand -hex 16)"
-        LINUX_PASSWORD="$(openssl rand -hex 25)"
-        SSH_LINUX_PASSWORD="$(openssl rand -hex 25)"
-        useradd -m -s /bin/bash "${LINUX_USERNAME}"
-        echo -e "${LINUX_PASSWORD}\n${LINUX_PASSWORD}" | passwd "${LINUX_USERNAME}"
-        usermod -aG sudo "${LINUX_USERNAME}"
-        USER_DIRECTORY="/home/${LINUX_USERNAME}"
-        USER_SSH_FOLDER="${USER_DIRECTORY}/.ssh"
-        mkdir -p "${USER_SSH_FOLDER}"
-        chmod 700 "${USER_SSH_FOLDER}"
-        PRIVATE_SSH_KEY="${USER_SSH_FOLDER}/id_ssh_ed25519"
-        PUBLIC_SSH_KEY="${USER_SSH_FOLDER}/id_ssh_ed25519.pub"
-        AUTHORIZED_KEY="${USER_SSH_FOLDER}/authorized_keys"
-        ssh-keygen -o -a 2500 -t ed25519 -f "${PRIVATE_SSH_KEY}" -N "${SSH_LINUX_PASSWORD}" -C "${LINUX_USERNAME}@${SERVER_HOST}"
-        cat "${PUBLIC_SSH_KEY}" >>"${AUTHORIZED_KEY}"
-        chmod 600 "${AUTHORIZED_KEY}"
-        chown -R "${LINUX_USERNAME}":"${LINUX_USERNAME}" "${USER_DIRECTORY}"
-        echo "System External IP: ${SERVER_HOST}"
-        echo "System Internal IP: ${INTERNAL_SERVER_HOST}"
-        echo "Linux Username: ${LINUX_USERNAME}"
-        echo "Linux Password: ${LINUX_PASSWORD}"
-        echo "SSH Public Key: $(cat "${PUBLIC_SSH_KEY}")"
-        echo "SSH Private Key: $(cat "${PRIVATE_SSH_KEY}")"
-        echo "SSH Passphrase: ${SSH_LINUX_PASSWORD}"
-    fi
-}
-
-create-user
 
 function handle-services() {
     # UFW
     if [ -x "$(command -v ufw)" ]; then
+        ufw --force enable
         ufw default allow incoming
         ufw default allow outgoing
-        ufw allow 22/tcp
     fi
     if pgrep systemd-journal; then
-        # SSH
-        systemctl enable ssh
-        systemctl restart ssh
         # Fail2ban
         systemctl enable fail2ban
         systemctl restart fail2ban
         # Ufw
-        ufw --force enable
         systemctl enable ufw
         systemctl restart ufw
     else
-        # SSH
-        service ssh enable
-        service ssh restart
         # fail2ban
         service fail2ban enable
         service fail2ban restart
         # ufw
-        ufw --force enable
         service ufw enable
         service ufw restart
     fi
